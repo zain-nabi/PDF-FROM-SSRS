@@ -43,3 +43,18 @@
             Core.Email.SendIntraSystemEmail(new[] { email }, null, "administrator@tritonexpress.co.za", "Please find attached the requested quotation", "Requested Quote document", "texdcmailmbx01", attachments, null);
             return Ok();
         }
+
+
+        [HttpPost]
+        public IActionResult OpsDailySales(DailySalesReportModel model)
+        {
+            var resetmodel = new DailySalesReportModel
+            {
+                Message = StringHelper.Types.NoRecords,
+                ShowReport = true,
+                Url = "http://tiger/ReportServer/Pages/ReportViewer.aspx?/OperationalReports/DailySales&ForDate=@ForDate&rs:ParameterLanguage=&rc:Parameters=Collapsed&rs:Command=Render&rs:Format=HTML4.0"
+                .Replace("@ForDate", model.Date.ToShortDateString())
+
+            };
+            return View(resetmodel);
+        }
