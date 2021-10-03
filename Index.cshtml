@@ -1,0 +1,354 @@
+﻿@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@model Vendor.Services.CustomModels.VendorQuoteSearchModel
+@{
+    ViewData["Title"] = "Search Quotes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main id="content" role="main" class="main">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-end">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-no-gutter">
+                            <li class="breadcrumb-item"><a class="breadcrumb-link" href="javascript:;">Quotation</a></li>
+                            <li class="breadcrumb-item"><a class="breadcrumb-link" href="javascript:;">Overview</a></li>
+                        </ol>
+                    </nav>
+
+                    <h1 class="page-header-title">Quotations</h1>
+                </div>
+            </div>
+            <!-- End Row -->
+        </div>
+        <form method="post">
+            <div class="row mb-5">
+                <div class="col-md-auto mb-5">
+                    <div class="js-focus-state">
+                        <label>Account</label>
+                        <div class="input-group">
+                            <select asp-for="CustomerID" asp-items="@(new SelectList(Model.AllowedCustomerList, "CustomerID", "CustomerName"))" class="custom-select mb-2" id="ddlCustomers"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-auto mb-5">
+                    <label>Period</label>
+                    <div id="datepickerWrapperFrom" class="u-datepicker input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <span class="fas fa-calendar"></span>
+                            </span>
+                            <input asp-for="FilterDate" id="js-daterangepicker-predefined" class="btn btn-white dropdown-toggle" placeholder="Date From" readonly="readonly" type="text" />
+                        </div>
+                    </div>
+                </div>
+                @*<div class="col-md-auto mb-5">
+                    <div class="js-focus-state">
+                        <label>CustomerXRef</label>
+                        <div class="input-group">
+                            <input class="form-control" id="txtQuoteRef" asp-for="QuoteRef" name="txtCustomer" placeholder="Quote No or X Ref" type="text" value="" />
+                        </div>
+                    </div>
+                </div>*@
+                <div class="col-md-auto mb-5">
+                    <div class="js-focus-state">
+                        <div class="input-group" style="padding-top:30px;">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
+        @if (Model.ShowReport == false)
+        {
+            <partial name="_RenderSearchScreenCard" view-data='@new ViewDataDictionary(ViewData) { { "TitleText", "Report" },{ "TitleSubText", "Report information will be shown here" } }' />
+        }
+        else
+        {
+            <div class="card">
+                <!-- Header -->
+                <div class="card-header">
+                    <div class="row justify-content-between align-items-center flex-grow-1">
+                        <div class="col-lg-6 mb-3 mb-lg-0">
+                            <form>
+                                <!-- Search -->
+                                <div class="input-group input-group-merge input-group-flush">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <i class="tio-search"></i>
+                                        </div>
+                                    </div>
+                                    <input id="datatableSearch" type="search" class="form-control" placeholder="Search orders" aria-label="Search orders">
+                                </div>
+                                <!-- End Search -->
+                            </form>
+                        </div>
+                    </div>
+                    <!-- End Row -->
+                </div>
+                <!-- End Header -->
+                <!-- Table -->
+                <div class="table-responsive datatable-custom">
+                    <div id="datatable_wrapper" class="dataTables_wrapper no-footer">
+                        <table id="datatable" class="table table-hover table-borderless table-thead-bordered table-nowrap table-align-middle card-table dataTable no-footer" style="width: 100%;" data-hs-datatables-options='{
+                              "order": [],
+             "info": {
+               "totalQty": "#datatableEntriesInfoTotalQty"
+             },
+             "entries": "#datatableEntries",
+             "isResponsive": false,
+             "isShowPaging": false,
+             "pagination": "datatableEntriesPagination"
+                   }'>
+                            <thead class="thead-light">
+                                <tr role="row">
+                                    <th>Ref</th>
+                                    <th>Date</th>
+                                    <th>Receiver</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in Model.Quotes)
+                                {
+                                    //var color = !item.LockoutEnabled ? "success" : "danger";
+                                    //var name = $"{item.FirstName} {item.LastName}";
+                                    var color = !string.IsNullOrEmpty(item.QuoteAccepted) ? "success" : "warning";
+
+                                    <tr class="">
+                                        <td class="align-middle">
+                                            <a class="d-flex align-items-center">
+                                                <div class="avatar avatar-soft-primary avatar-circle">
+                                                    <span class="avatar-initials">@item.QuoteNo.Substring(0, 1)</span>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <span class="d-block h5 text-hover-primary mb-0">@item.QuoteNo</span>
+                                                </div>
+                                            </a>
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="media align-items-center">
+                                                <span>@item.DateQuote.ToString("dd MMMM yyyy")</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @item.RecName
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-soft-@color">
+                                                <span class="legend-indicator bg-@color"></span>@(!string.IsNullOrEmpty(item.QuoteAccepted) ? "Accepted" : "Pending")
+                                            </span>
+                                        </td>
+
+                                        <td class="align-middle">
+                                            <a class="btn btn-sm btn-white" href="@Url.Action("View", new { item.QuoteID} )">
+                                                <i class="tio-receipt-outlined mr-1"></i> View
+                                            </a>
+                                            <a class="btn btn-sm btn-white" href="@Url.Action("Create", new { item.QuoteID })">
+                                                <i class="fal fa-copy mr-1"></i> Copy
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- End Table -->
+                <!-- Footer -->
+                <div class="card-footer">
+                    <!-- Pagination -->
+                    <div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+                        <div class="col-sm mb-2 mb-sm-0">
+                            <div class="d-flex justify-content-center justify-content-sm-start align-items-center">
+                                <span class="mr-2">Showing:</span>
+
+                                <!-- Select -->
+                                <select id="datatableEntries" class="js-select2-custom"
+                                        data-hs-select2-options='{
+                    "minimumResultsForSearch": "Infinity",
+                    "customClass": "custom-select custom-select-sm custom-select-borderless",
+                    "dropdownAutoWidth": true,
+                    "width": true
+                  }'>
+                                    <option value="3">3</option>
+                                    <option value="6" selected>6</option>
+                                    <option value="9">9</option>
+                                </select>
+                                <!-- End Select -->
+
+                                <span class="text-secondary mr-2">of</span>
+
+                                <!-- Pagination Quantity -->
+                                <span id="datatableEntriesInfoTotalQty"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-auto">
+                            <div class="d-flex justify-content-center justify-content-sm-end">
+                                <!-- Pagination -->
+                                <nav id="datatableEntriesPagination" aria-label="Activity pagination"></nav>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Pagination -->
+                </div>
+                <!-- End Footer -->
+            </div>
+
+
+
+            <!--<div class="card">-->
+            <!-- Header -->
+            <!--<div class="card-header">
+                <div class="row justify-content-between align-items-center flex-grow-1">
+                    <div class="col-sm-6 col-md-4 mb-3 mb-sm-0">
+                        <form>-->
+            <!-- Search -->
+            <!--<div class="input-group input-group-merge input-group-flush">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <i class="tio-search"></i>
+                    </div>
+                </div>
+                <input id="datatableSearch" type="search" class="form-control" placeholder="Filter results" aria-label="Filter results">
+            </div>-->
+            <!-- End Search -->
+            <!--</form>
+                </div>
+            </div>-->
+            <!-- End Row -->
+            <!--</div>-->
+            <!-- End Header -->
+            <!-- Table -->
+            <!--<div class="table-responsive datatable-custom">
+                <div id="datatable_wrapper" class="dataTables_wrapper">
+                    <table id="datatable" class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table"
+                           data-hs-datatables-options='{
+                 "order": [],
+                 "info": {
+                   "totalQty": "#datatableWithPaginationInfoTotalQty"
+                 },
+                 "search": "#datatableSearch",
+                 "entries": "#datatableEntries",
+                 "pageLength": 8,
+                 "isResponsive": false,
+                 "isShowPaging": false,
+                 "pagination": "datatablePagination"
+               }'>
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Ref</th>
+                                <th>Date</th>
+                                <th>Receiver</th>
+                                <th>Receiver</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-size-1">
+                            @foreach (var item in Model.Quotes)
+                            {
+                                //var color = !item.LockoutEnabled ? "success" : "danger";
+                                //var name = $"{item.FirstName} {item.LastName}";
+                                var color = !string.IsNullOrEmpty(item.QuoteAccepted) ? "success" : "danger";
+
+                                <tr class="">
+                                    <td class="align-middle">
+                                        <div class="media align-items-center">
+                                            <span>@item.QuoteNo</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="media align-items-center">
+                                            <span>@item.DateQuote.ToString("dd MMMM yyyy")</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="media align-items-center">
+                                            <span>@item.RecName</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="fas fa-circle text-@color small mr-1"></span>
+                                        @(!string.IsNullOrEmpty(item.QuoteAccepted) ? "Accepted" : "Pending")
+                                    </td>
+
+                                    <td class="align-right">
+                                        <div class="position-relative text-center">
+                                            <a id="settingsDropdown1Invoker-@item.QuoteID" class="btn btn-sm btn-icon btn-soft-secondary btn-bg-transparent rounded" href="javascript:;" role="button" aria-controls="settingsDropdown-@item.QuoteID" aria-haspopup="true" aria-expanded="false" data-unfold-event="click" data-unfold-target="#settingsDropdown-@item.QuoteID" data-unfold-type="css-animation" data-unfold-duration="300" data-unfold-delay="300" data-unfold-hide-on-scroll="true" data-unfold-animation-in="slideInUp" data-unfold-animation-out="fadeOut">
+                                                <span class="fas fa-ellipsis-h btn-icon__inner"></span>
+                                            </a>
+
+                                            <div id="settingsDropdown-@item.QuoteID" class="dropdown-menu dropdown-unfold dropdown-menu-right u-unfold--css-animation u-unfold--hidden fadeOut" aria-labelledby="settingsDropdown1Invoker-@item.QuoteID" style="min-width: 160px; animation-duration: 300ms; right: 0px;">
+                                                <a class="dropdown-item" href="@Url.Action("View", new { item.QuoteID} )">
+                                                    <small class="fas fa-edit dropdown-item-icon"></small>
+                                                    View
+                                                </a>
+
+                                                <a class="dropdown-item" href="@Url.Action("Create", new { item.QuoteID })">
+                                                    <small class="fad fa-copy dropdown-item-icon"></small>
+                                                    Replicate
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>-->
+            <!-- End Table -->
+            <!-- Footer -->
+            <!--<div class="card-footer">-->
+            <!-- Pagination -->
+            <!--<div class="row justify-content-center justify-content-sm-between align-items-sm-center">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <div class="d-flex justify-content-center justify-content-sm-start align-items-center">
+                        <span class="mr-2">Showing:</span>-->
+
+            <!-- Select -->
+            <!--<select id="datatableEntries" class="js-select2-custom"
+                          data-hs-select2-options='{
+              "minimumResultsForSearch": "Infinity",
+              "customClass": "custom-select custom-select-sm custom-select-borderless",
+              "dropdownAutoWidth": true,
+              "width": true
+            }'>
+                      <option value="4">4</option>
+                      <option value="6">6</option>
+                      <option value="8" selected>8</option>
+                      <option value="12">12</option>
+                  </select>-->
+            <!-- End Select -->
+
+            <!--<span class="text-secondary mr-2">of</span>-->
+
+            <!-- Pagination Quantity -->
+            <!--<span id="datatableWithPaginationInfoTotalQty"></span>
+                </div>
+            </div>
+
+            <div class="col-sm-auto">
+                <div class="d-flex justify-content-center justify-content-sm-end">-->
+            <!-- Pagination -->
+            <!--<nav id="datatablePagination" aria-label="Activity pagination"></nav>
+                    </div>
+                </div>
+            </div>-->
+            <!-- End Pagination -->
+            <!--</div>-->
+            <!-- End Footer -->
+
+            <!--</div>-->
+        }
+    </div>
+</main>

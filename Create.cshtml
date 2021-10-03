@@ -1,0 +1,713 @@
+﻿@model Vendor.Services.CustomModels.VendorQuoteModel
+
+@{
+    ViewData["Title"] = "Create a quote";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var required = string.Empty;
+    var selected = string.Empty;
+    int i = 0;
+}
+
+<main id="content" role="main" class="main">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-center">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-no-gutter">
+                            <li class="breadcrumb-item"><span class="breadcrumb-link">Quotation</span></li>
+                            <li class="breadcrumb-item active" aria-current="page">Create</li>
+                        </ol>
+                    </nav>
+
+                    <h1 class="page-header-title">New quotation</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- For Validation -->
+        <!-- End For Validation -->
+        <div class="row justify-content-lg-center">
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card-header bg-soft-secondary">
+                        <h5 class="card-header-title">Quotation</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <form class="row g-3 js-validate" asp-controller="Quotation" asp-action="Create" method="post">
+                            <div class="col-md-6">
+
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon3">ACCOUNT</span>
+                                    </div>
+                                    <select id="ddlCustomers" required data-msg="Please select a customer" class="custom-select" asp-for="Quote.CustomerID" asp-items="@(new SelectList(Model.AllowedCustomerList, "CustomerID", "AccountCode"))"
+                                            data-hs-select2-options='{
+                                                    "minimumResultsForSearch": "Infinity",
+                                                    "placeholder": "Select Customer"
+                                                    }'>
+                                    </select>
+                                </div>
+
+                            </div>                            
+                            <div class="col-md-6">
+                                <select asp-for="Quote.ServiceTypeID" asp-items="@(new SelectList(Model.TransportTypes, "TransportTypeID", "Description", "1"))" class="js-select2-custom custom-select"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <input asp-for="Quote.SenAdd4" class="form-control" type="text" id="txtFromSuburb" placeholder="SUBURB FROM" aria-label="SUBURB FROM" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input asp-for="Quote.RecAdd4" class="form-control" type="text" id="txtToSuburb" placeholder="SUBURB TO" aria-label="SUBURB TO" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input asp-for="Quote.SenAdd5" class="form-control" type="hidden" id="txtSenPostalCode"  placeholder="Senders Potal Code" aria-label="Sender">
+                            </div>
+                            <div class="col-md-6">
+                                <input asp-for="Quote.RecAdd5" class="form-control" type="hidden" id="txtRecPostalCode"   placeholder="Receiver's Postal Code" aria-label="Receiver">
+                            </div>
+                            @*<div class="col-md-6">
+            <input asp-for="Quote.SenSite" class="form-control" type="text" id="txtSenderSite" placeholder="From Site (Optional)" aria-label="From Site (Optional)">
+        </div>
+        <div class="col-md-6">
+            <input asp-for="Quote.SenSite" class="form-control" type="text" id="txtReceiverSite" placeholder="To Site (Optional)" aria-label="To Site (Optional)">
+        </div>*@
+
+                            <div class="col-md-12">
+                                <!-- Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-lg table-borderless table-thead-bordered table-nowrap table-align-middle" id="tblDimensions">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Line No</th>
+                                                <th>Quantity</th>
+                                                <th>Description</th>
+                                                <th>Length (cm)</th>
+                                                <th>Breadth (cm)</th>
+                                                <th>Height (cm)</th>
+                                                <th>Weight (kg)</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            @for (@i = 1; @i < 6; @i++)
+                                            {
+                                                if (@i == 1)
+                                                {
+                                                    required = "required";
+                                                    selected = "selected";
+                                                }
+                                                else
+                                                {
+                                                    required = string.Empty;
+                                                    selected = string.Empty;
+                                                }
+                                                if (@i == 1)
+                                                {
+                                                    <tr class="rowClass">
+                                                        <td><label id="txtLineNo-@i">@i</label></td>
+                                                        <td><input type="number" class="form-control myClass" id="@("txtQty"+i)" name="Qty" data-rule-digits="true" @required /></td>
+                                                        <td>
+                                                            <select class="js-select2-custom custom-select myClass" name="Description" size="1" id="@("txtDescription"+i)" @required
+                                                                    data-hs-select2-options='{ "minimumResultsForSearch": "Infinity","placeholder": "Load" }'>
+                                                                <option label="empty"></option>
+                                                                <option value="Boxes" selected>Boxes</option>
+                                                                <option value="Envelop">Envelop</option>
+                                                                <option value="Pallet">Pallet</option>
+                                                            </select>
+
+                                                        </td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtLength"+i)" name="Length" data-rule-digits="true" max="600" data-msg="Max length 600cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtBreadth"+i)" name="Breadth" data-rule-digits="true" max="250" data-msg="Max breadth 250cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtHeight"+i)" name="Height" data-rule-digits="true" max="250" data-msg="Max height 250cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtMass"+i)" name="Mass" data-rule-digits="true" @required /></td>
+                                                    </tr>
+                                                }
+                                                else
+                                                {
+                                                    <tr class="rowClass">
+                                                        <td><label id="txtLineNo-@i">@i</label></td>
+                                                        <td><input type="number" class="form-control myClass" id="@("txtQty"+i)" name="Qty" data-rule-digits="true" @required /></td>
+                                                        <td>
+                                                            <select class="js-select2-custom custom-select myClass" name="Description" size="1" id="@("txtDescription"+i)" @required
+                                                                    data-hs-select2-options='{ "minimumResultsForSearch": "Infinity","placeholder": "Load" }'>
+                                                                <option label="empty"></option>
+                                                                <option value="Boxes">Boxes</option>
+                                                                <option value="Envelop">Envelop</option>
+                                                                <option value="Pallet">Pallet</option>
+                                                            </select>
+
+                                                        </td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtLength"+i)" name="Length" data-rule-digits="true" max="600" data-msg="Max length 600cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtBreadth"+i)" name="Breadth" data-rule-digits="true" max="250" data-msg="Max breadth 250cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtHeight"+i)" name="Height" data-rule-digits="true" max="250" data-msg="Max height 250cm" @required /></td>
+                                                        <td><input type="number" class="form-control myClass" maxlength="3" id="@("txtMass"+i)" name="Mass" data-rule-digits="true" @required /></td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <button type="button" class="form-link btn btn-sm btn-no-focus btn-ghost-primary" id="addRow"><i class="tio-add"></i> Add Dimension</button>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 js-form-message">
+                                <div class="d-flex">
+                                    <div class="custom-control custom-checkbox form-check form-check-inline">
+                                        <input type="checkbox" id="form-control-min-check-1" class="custom-control-input" name="chkAcceptance1" data-msg="Please agree to the quotation terms" required>
+                                        <label class="custom-control-label" for="form-control-min-check-1">Quote is based on service type, size, mass, origin and destination as supplied. Should any information differ on actual waybill, then the amount charged will be adjusted accordingly. Quote valid for 30 days. Surcharges will be applied for early birds, Saturday deliveries and cross border documentation where applicable. Export and import VAT charges are excluded.  Standard Terms and Conditions apply.</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 js-form-message">
+                                <div class="d-flex">
+                                    <div class="custom-control custom-checkbox form-check form-check-inline">
+                                        <input type="checkbox" id="form-control-min-check-2" class="custom-control-input" name="chkAcceptance2" data-msg="Please agree to the terms and conditions" required>
+                                        <label class="custom-control-label" for="form-control-min-check-2" required>Agree to the Standard Trading Conditions of Triton Express PTY Ltd.</label>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary" id="btnSave">Generate Quote</button>
+                            </div>
+                            <input asp-for="QuoteLineHF" type="hidden" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Row -->
+    </div>
+</main>
+
+<style>
+    .flex-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+</style>
+
+@section scripts{
+    <script src="~/js/bloodhound.min.js"></script>
+    <script src="~/js/handlebars.min-v4.7.7.js"></script>
+    <script src="~/js/typeahead.bundle.min.js"></script>
+    <!-- JS Implementing Plugins -->
+    <!-- JS Front -->
+    <script>
+        var counter = 1;
+        var parcels = 0;
+        var dataSet = [];
+
+        var counter1 = 1;
+        var parcels1 = 0;
+        var dataSet1 = [];
+
+        var txtMass = "txtMass";
+        var txtDescription = "txtDescription";
+        var txtHeight ="txtHeight";
+        var txtBreadth ="txtBreadth";
+        var txtLength ="txtLength";
+        var txtQty = "txtQty";
+
+        $('.NewSite').hide();
+        $('.SenNewSite').hide();
+        $('.SenNoSite').hide();
+        $('.NoSite').hide();
+        $('.SavedSite').show();
+        $('.SenSavedSite').show();
+
+        var t = $('#dtTable');
+        var tbody = '';
+
+        var t1 = $('#dtTable1');
+        var tbody1 = '';
+
+        //var t = $('#dtTable').DataTable(
+        //    {
+        //        columns: [
+        //            { data: "LineNo" },
+        //            { data: "Qty" },
+        //            { data: "Description" },
+        //            { data: "Dimensions" },
+        //            { data: "Mass" },
+        //            { data: "VolWeight" }
+        //        ], "ordering": false
+        //        , "paging": false
+        //        , "searching": false
+        //        , "info": false
+        //        , "language": {
+        //            "emptyTable": "Please add at least one line"
+        //        }
+        //    }
+        //);
+
+        function removeRow(index) {
+            dataSet.splice(index - 1, 1);
+            parcels = 0;
+            dataSet.forEach(sortArray);
+
+            //t.clear();
+            $('#bodyCal').empty();
+            tbody = "";
+
+            $('#QuoteLineHF').val();
+
+            dataSet.forEach(addTableRows);
+            $('#lblTotalParcels').text(parcels);
+            //t.draw();
+            $('#bodyCal').html(tbody);
+
+            $('#QuoteLineHF').val(encodeURIComponent(JSON.stringify(dataSet)));
+        };
+
+        function removeRow1(index) {
+            dataSet1.splice(index - 1, 1);
+            parcels1 = 0;
+            dataSet1.forEach(sortArray1);
+
+            //t.clear();
+            $('#bodyCal1').empty();
+            tbody1 = "";
+
+             $('#NonSaSurchages').val();
+             $('#SaSurchages').val();
+
+
+            dataSet1.forEach(addTableRows1);
+            $('#lblTotalSurCharges').text(parcels1);
+            //t.draw();
+            $('#bodyCal1').html(tbody1);
+            $('#NonSaSurchages').val(encodeURIComponent(JSON.stringify(dataSet1)));
+            $('#SaSurchages').val(encodeURIComponent(JSON.stringify(dataSet1)));
+        };
+
+        function sortArray(item, index) {
+            item["LineNo"] = index + 1;
+        }
+
+        function sortArray1(item, index) {
+            item["LineNo"] = index + 1;
+        }
+
+        function addTableRows(item) {
+            parcels = parcels + parseInt(item["Qty"]);
+            tbody += ' <tr><td class= "align-middle" >' + item["LineNo"] + '</td ><td class= "align-middle" >' + item["Qty"] + '</td ><td class="align-middle">' + item["Description"] + '</td><td class="align-middle">' + item["Length"] + 'x' + item["Breadth"] + 'x' + item["Height"] + '</td><td class="align-middle">' + item["Mass"] + 'kg</td><td class="align-middle"><a class="d-block text-secondary font-size-1" href="javascript:;" onclick="removeRow(' + item["LineNo"] + ')"><span class="far fa-trash-alt mr-1"></span></a></td></tr >';
+        };
+
+        function addTableRows1(item) {
+            parcels1 = parcels1 + parseInt(item["SundryCharge"]);
+            tbody1 += ' <tr><td class= "align-middle" >' + item["LineNo"] + '</td ><td class= "align-middle" >' + item["SundryDescr"] + '</td ><td class="align-middle">' + item["SundryCharge"] + '</td><td class="align-middle"><a class="d-block text-secondary font-size-1" href="javascript:;" onclick="removeRow1(' + item["LineNo"] + ')"><span class="far fa-trash-alt mr-1"></span></a></td></tr >';
+        };
+
+        function showReceiverSite(option) {
+            switch (option) {
+            case "ExistingSite":
+                $('.SavedSite').show();
+                $('.NoSite').hide();
+                break;
+            case "NewSite":
+                $('.SavedSite').show();
+                $('.NoSite').hide();
+                break;
+            case "NoSite":
+                $('.SavedSite').hide();
+                $('.NoSite').show();
+                break;
+            }
+        };
+
+        function showSenderSite(option) {
+            switch (option) {
+            case "ExistingSite":
+                $('.SenSavedSite').show();
+                $('.SenNoSite').hide();
+                break;
+            case "NewSite":
+                $('.SenSavedSite').show();
+                $('.SenNoSite').hide();
+                break;
+            case "NoSite":
+                $('.SenSavedSite').hide();
+                $('.SenNoSite').show();
+                break;
+            }
+        };
+
+        var lastValue = '';
+        $("#txtLength5").on('change keyup paste mouseup', function () {
+            if ($(this).val() != lastValue)
+            {
+                lastValue = $(this).val();
+                document.getElementById('addRow').disabled = false;
+            }
+        });
+
+
+        $(document).ready(function() {
+            $('.noDimensions').hide();
+
+            $('#lblTotalParcels').text(parcels);
+
+            var v = document.getElementById('txtLength5').value;
+            if (v != null) {
+                document.getElementById('addRow').disabled = true;
+            }
+
+            var uniqueID = 6;
+            $('#addRow').on('click',
+                function() {
+                    var html = `<tr class="rowClass">
+                                    <td><label id="txtLineNo${uniqueID}">${uniqueID}</label></td>
+                                    <td><input type="number" class="form-control myClass" id="txtQty${uniqueID}" name="Qty" data-rule-digits="true"></td>
+                                    <td>
+                                        <select class="js-select2-custom custom-select myClass" name="Description" size="1" id="txtDescription${uniqueID}"
+                                                data-hs-select2-options='{ "minimumResultsForSearch": "Infinity","placeholder": "Load" }'>
+                                            <option></option>
+                                            <option value="Boxes" selected>Boxes</option>
+                                            <option value="Envelop">Envelop</option>
+                                            <option value="Pallet">Pallet</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="number" class="form-control myClass" maxlength="3" id="txtLength${uniqueID}" name="Length" data-rule-digits="true" max="600" data-msg="Max length 600cm"></td>
+                                    <td><input type="number" class="form-control myClass" maxlength="3" id="txtBreadth${uniqueID}" name="Breadth" data-rule-digits="true" max="250" data-msg="Max breadth 250cm"></td>
+                                    <td><input type="number" class="form-control myClass" maxlength="3" id="txtHeight${uniqueID}" name="Height" data-rule-digits="true" max="250" data-msg="Max height 250cm"></td>
+                                    <td><input type="number" class="form-control myClass" maxlength="3" id="txtMass${uniqueID}" name="Mass" data-rule-digits="true"></td>
+                                </tr>`;
+                    //$("#DimensionRows").append(html);
+
+                    $('#tblDimensions tr:last').after(html);
+                    uniqueID++;
+                  
+                    $('.js-select2-custom').each(function () {
+                        var select2 = $.HSCore.components.HSSelect2.init($(this));
+                    });
+
+                    const res = $('.rowClass').map(function () {
+                        var obj = {};
+                        $(this).find('input.myClass, select.myClass').each(function (i, el) {
+                            if (el.value != "0" && el.value != "") {
+
+                                obj[el.name] = el.value;
+                            }
+                        })
+                        console.log(obj);
+                        return obj
+                    }).get()
+
+                    document.getElementById('QuoteLineHF').value = '';
+                    $('#QuoteLineHF').val(encodeURIComponent(JSON.stringify(res)));
+                    dataSet.push(res);
+                });
+
+            $('#btnSave').on('click', function () {
+                const res = $('#Row1').map(function () {
+                    $(this).find('input.myClass, select.myClass').each(function (i, el) {
+                        if (el.value == "0") {
+                            $("#DimensionRowQty1").attr('class', 'js-form-message');
+                            $("#DimensionRowMass1").attr('class', 'js-form-message');
+                            $("#DimensionRowHeight1").attr('class', 'js-form-message');
+                            $("#DimensionRowLength1").attr('class', 'js-form-message');
+                            $("#DimensionRowBreadth1").attr('class', 'js-form-message');
+
+                            document.getElementById('txtQty1').value = '';
+                            $("#txtQty1").attr('required', '');
+
+                            document.getElementById('txtLength1').value = '';
+                            $("#txtLength1").attr('required', '');
+
+                            document.getElementById('txtBreadth1').value = '';
+                            $("#txtBreadth1").attr('required', '');
+
+                            document.getElementById('txtHeight1').value = '';
+                            $("#txtHeight1").attr('required', '');
+
+                            document.getElementById('txtMass1').value = '';
+                            $("#txtMass1").attr('required', '');
+
+                            $('#errDimension').text('No dimensions added');
+                            $('.noDimensions').show();
+                        }
+                    })
+                }).get()
+
+                const response = $('.rowClass').map(function () {
+                    var obj = {};
+                    $(this).find('input.myClass, select.myClass').each(function (i, el) {
+                        if (el.value != "0" && el.value != "") {
+                            obj[el.name] = el.value;
+                        }
+                    })
+                    return obj
+                }).get()
+                document.getElementById('QuoteLineHF').value = '';
+                $('#QuoteLineHF').val(encodeURIComponent(JSON.stringify(response)));
+                dataSet.push(response);
+                console.log($('#QuoteLineHF').val());
+            });
+
+
+            $('#txtSenderPostalCode'),
+                pname = new Bloodhound({
+                    datumTokenizer: function(datum) {
+                        return Bloodhound.tokenizers.whitespace(datum.title);
+                    },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/Ajax/GetPostalCodes?name=%QUERY",
+                        replace: function(url) {
+                            var ponumber = null;
+                            $(":focus").each(function() {
+                                ponumber = "#" + this.id;
+                            });
+                            return url.replace('%QUERY', $(ponumber).val());
+                        },
+                        filter: function(pname) {
+                            return pname;
+                        }
+                    }
+                });
+
+            $('#txtReceiverPostalCode'),
+                pname2 = new Bloodhound({
+                    datumTokenizer: function(datum) {
+                        return Bloodhound.tokenizers.whitespace(datum.title);
+                    },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/Ajax/GetPostalCodes?name=%QUERY",
+                        replace: function(url) {
+                            var ponumber = null;
+                            $(":focus").each(function() {
+                                ponumber = "#" + this.id;
+                            });
+                            return url.replace('%QUERY', $(ponumber).val());
+                        },
+                        filter: function(pname) {
+                            return pname;
+                        }
+                    }
+                });
+
+            $('#txtFromSuburb'),
+                sname = new Bloodhound({
+                    datumTokenizer: function(datum) {
+                        return Bloodhound.tokenizers.whitespace(datum.title);
+                    },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/Ajax/GetSuburbs?suburb=%QUERY",
+                        replace: function(url) {
+                            var ponumber = null;
+                            $(":focus").each(function() {
+                                ponumber = "#" + this.id;
+                            });
+                            return url.replace('%QUERY', $(ponumber).val());
+                        },
+                        filter: function(sname) {
+                            return sname;
+                        }
+                    }
+                });
+
+            $('#txtToSuburb'),
+                sname2 = new Bloodhound({
+                    datumTokenizer: function(datum) {
+                        return Bloodhound.tokenizers.whitespace(datum.title);
+                    },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace,
+                    remote: {
+                        url: "/Ajax/GetSuburbs?suburb=%QUERY",
+                        replace: function(url) {
+                            var ponumber = null;
+                            $(":focus").each(function() {
+                                ponumber = "#" + this.id;
+                            });
+                            return url.replace('%QUERY', $(ponumber).val());
+                        },
+                        filter: function(sname2) {
+                            return sname2;
+                        }
+                    }
+                });
+
+
+            // Initialize the Bloodhound suggestion engine
+            pname.initialize();
+            pname2.initialize();
+            sname.initialize();
+            sname2.initialize();
+
+            var typeaheadSettings = {
+                hint: false,
+                highlight: true,
+                minLength: 1,
+                display: Handlebars.compile('{{name}}'),
+                source: pname.ttAdapter(),
+                cache: false,
+                classNames: {
+                    open: 'is-open',
+                    empty: 'is-empty',
+                    cursor: 'is-active',
+                    suggestion: 'Typeahead-suggestion',
+                    selectable: 'Typeahead-selectable'
+                },
+                templates: {
+                    empty: [
+                        '<div class="empty-message">',
+                        'Unable to find any postal names that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    //<p style='padding:6px'><img width=50 src='{{poster_path}}'> <b>{{value}}</b> - Release date {{release_date}} </p>
+                    suggestion: Handlebars.compile('<div><label>{{postalcode}}</label><label class="pull-right">{{name}}</label></div>'),
+                    footer: Handlebars.compile("<b>Searched for '{{query}}'</b>")
+                }
+            };
+
+            var typeaheadSettings2 = {
+                hint: false,
+                highlight: true,
+                minLength: 1,
+                display: Handlebars.compile('{{name}}'),
+                source: pname2.ttAdapter(),
+                cache: false,
+                classNames: {
+                    open: 'is-open',
+                    empty: 'is-empty',
+                    cursor: 'is-active',
+                    suggestion: 'Typeahead-suggestion',
+                    selectable: 'Typeahead-selectable'
+                },
+                templates: {
+                    empty: [
+                        '<div class="empty-message">',
+                        'Unable to find any postal names that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    //<p style='padding:6px'><img width=50 src='{{poster_path}}'> <b>{{value}}</b> - Release date {{release_date}} </p>
+                    suggestion: Handlebars.compile('<div><label>{{postalcode}}</label><label class="pull-right">{{name}}</label></div>'),
+                    footer: Handlebars.compile("<b>Searched for '{{query}}'</b>")
+                }
+            };
+
+            function populateSendersPostalCode(postalCode) {
+                document.getElementById('txtSenPostalCode').text = postalCode;
+            }
+
+            var txtSenderSiteTypeahead = {
+                hint: false,
+                highlight: true,
+                minLength: 1,
+                display: Handlebars.compile('{{suburb}}'),
+                source: sname.ttAdapter(),
+                cache: false,
+                classNames: {
+                    open: 'is-open',
+                    empty: 'is-empty',
+                    cursor: 'is-active',
+                    suggestion: 'Typeahead-suggestion',
+                    selectable: 'Typeahead-selectable'
+                },
+                templates: {
+                    empty: [
+                        '<div class="empty-message">',
+                        'Unable to find any sites that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    //<p style='padding:6px'><img width=50 src='{{poster_path}}'> <b>{{value}}</b> - Release date {{release_date}} </p>
+                    suggestion: Handlebars.compile('<div><label>{{name}}</label> - <label class="pull-right">{{suburb}} | {{postalCode}}</label></div>'),
+                    footer: Handlebars.compile("<b> Searched for '{{query}}'</b>")
+
+                }
+            };
+
+            var txtReceiverSiteSettings4 = {
+                hint: false,
+                highlight: true,
+                minLength: 1,
+                display: Handlebars.compile('{{suburb}}'),
+                source: sname.ttAdapter(),
+                cache: false,
+                classNames: {
+                    open: 'is-open',
+                    empty: 'is-empty',
+                    cursor: 'is-active',
+                    suggestion: 'Typeahead-suggestion',
+                    selectable: 'Typeahead-selectable'
+                },
+                templates: {
+                    empty: [
+                        '<div class="empty-message">',
+                        'Unable to find any sites that match the current query',
+                        '</div>'
+                    ].join('\n'),
+                    //<p style='padding:6px'><img width=50 src='{{poster_path}}'> <b>{{value}}</b> - Release date {{release_date}} </p>
+                    suggestion: Handlebars.compile('<div><label>{{name}}</label> - <label class="pull-right">{{suburb}} | {{postalCode}}</label></div>'),
+                    footer: Handlebars.compile("<b> Searched for '{{query}}'</b>")
+
+                }
+            };
+
+            // Instantiate the Typeahead UI
+            $('#txtSenderPostalCode').typeahead('destroy');
+            $('#txtReceiverPostalCode').typeahead('destroy');
+            $('#txtSenderSite').typeahead('destroy');
+            $('#txtReceiverSite').typeahead('destroy');
+            $('#txtFromSuburb').typeahead('destroy');
+            $('#txtToSuburb').typeahead('destroy');
+
+            $('#txtSenderPostalCode').typeahead(null, typeaheadSettings).on("typeahead:selected",
+                function(obj, selectedItem) {
+                    $("#Quote_SenAdd4").val(selectedItem.postalCode);
+                    $("#Quote_SenAdd5").val(selectedItem.name);
+                });
+            $('#txtReceiverPostalCode').typeahead(null, typeaheadSettings2).on("typeahead:selected",
+                function(obj, selectedItem) {
+                    $("#Quote_RecAdd4").val(selectedItem.postalCode);
+                    $("#Quote_RecAdd5").val(selectedItem.name);
+                });
+
+            $('#txtFromSuburb').typeahead(null, txtSenderSiteTypeahead).on("typeahead:selected",
+                function(obj, selectedItem) {
+                    $("#Quote_SenAdd1").val(selectedItem.Suburb);
+                    $("#Quote_SenAdd2").val(selectedItem.PostalCode);
+                    document.getElementById('txtSenPostalCode').value = selectedItem.postalCode;
+                    //$("#Quote_SenAdd3").val(selectedItem.addressPhysical.streetAdd3);
+                    //$("#Quote_SenAdd4").val(selectedItem.addressPhysical.streetAdd4);
+                    //$("#Quote_SenAdd5").val(selectedItem.addressPhysical.streetAdd5);
+                    //$("#Quote_SenName").val(selectedItem.siteName);
+                    //$("#Quote_SenContact").val(selectedItem.contactPerson);
+                    //$("#Quote_SenFaxNo").val(selectedItem.FaxNo);
+                    //$("#Quote_SenTelNo").val(selectedItem.telephoneNo.replace(/ /g, ""));
+                });
+
+            $('#txtToSuburb').typeahead(null, txtReceiverSiteSettings4).on("typeahead:selected",
+                function(obj, selectedItem) {
+                    $("#Quote_RecAdd1").val(selectedItem.Suburb);
+                    $("#Quote_RecAdd2").val(selectedItem.PostalCode);
+                    document.getElementById('txtRecPostalCode').value = selectedItem.postalCode;
+                    //$("#Quote_RecAdd3").val(selectedItem.addressPhysical.streetAdd3);
+                    //$("#Quote_RecAdd4").val(selectedItem.addressPhysical.streetAdd4);
+                    //$("#Quote_RecAdd5").val(selectedItem.addressPhysical.streetAdd5);
+                    //$("#Quote_RecName").val(selectedItem.siteName);
+                    //$("#Quote_RecContact").val(selectedItem.contactPerson);
+                    //$("#Quote_RecFax").val(selectedItem.FaxNo);
+                    //$("#Quote_RecTelNo").val(selectedItem.telephoneNo.replace(/ /g, ""));
+                });
+        });
+
+        function setDescription(parcelOption) {
+            $('#txtDescription').val(parcelOption);
+        }
+    </script>
+    <style>
+        .twitter-typeahead {
+            width: 100%;
+        }
+    </style>
+}
+

@@ -1,0 +1,302 @@
+﻿@model Vendor.Services.CustomModels.VendorQuoteModel
+@using Microsoft.Extensions.Configuration
+@{
+    ViewData["Title"] = "View quote - " + Model.Quote.QuoteNo;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Header"] = "View Quote - ";
+    ViewData["HeaderBold"] = Model.Quote.QuoteNo;
+    ViewData["Description"] = $"Created {Model.Quote.DateQuote.ToString("ddd, dd MMMM yyyy")}" + $"{ (Model.Quote.QuoteExpiryDateStamp.HasValue ? $", expires {Model.Quote.QuoteExpiryDateStamp.Value.ToString("ddd, dd MMMM yyyy")}" : "")}";
+}
+
+@inject IConfiguration Configuration
+@{
+    var template = $"{Configuration.GetSection("URL").GetSection("template").Value}";
+}
+
+@functions {
+
+    private void RenderDeliveryInformation(string address, string text, string icon)
+    {
+        <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center mr-2">
+                <span class="btn btn-icon btn-soft-danger rounded-circle">
+                    <span class="btn-icon__inner"><i class="@icon"></i></span>
+                </span>
+                <div class="ml-3">
+                    <h5 class="text-hover-primary mb-0">@(address == null ? "N/A" : address)</h5>
+                    <span class="font-size-sm text-body">@text</span>
+                </div>
+            </div>
+        </div>
+    }
+    private void RenderBlock(string label, string value, string icon, string color)
+    {
+        <div class="card card-frame transition-3d-hover mb-3">
+            <!-- Card -->
+            <div class="card-body">
+                <div class="media">
+                    <span class="btn btn-lg btn-icon btn-soft-@color rounded-circle mr-4">
+                        <span class="fas @icon btn-icon__inner"></span>
+                    </span>
+                    <div class="media-body px-4">
+                        <h4 class="h6 text-dark mb-1">@value</h4>
+                        <small class="d-block text-muted">@label</small>
+                    </div>
+                </div>
+            </div>
+            <!-- End Card -->
+        </div>
+    }
+
+    private void RenderDocuments(string label, string href, string id)
+    {
+        <li class="list-group-item py-3">
+            <div class="media">
+                <div class="mt-1 mr-3">
+                    <div class="media align-items-center">
+                        <div class="avatar avatar-sm avatar-soft-secondary avatar-circle mr-2">
+                            <span class="avatar-initials">@label.Substring(0, 1)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="media-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">@label</h5>
+                            <span class="d-block font-size-sm">Quotation</span>
+                        </div>
+
+                        <div class="col-auto">
+                            <a class="btn btn-sm btn-soft-primary" href="@href" title="" target="_blank">
+                                View <i class="tio-open-in-new ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End Row -->
+                </div>
+            </div>
+        </li>
+    }
+
+    private void RenderLabel(string label, string value, string icon)
+    {
+        <div class="d-flex align-items-start mb-4">
+            <span class="btn btn-icon btn-soft-danger rounded-circle">
+                <span class="btn-icon__inner"><i class="fad @icon"></i></span>
+            </span>
+
+            <div class="ml-3">
+                <span class="d-block text-dark">@label</span>
+                <small class="d-block text-secondary">@value</small>
+            </div>
+        </div>
+    }
+
+    private void DisableDocuments(string label)
+    {
+        <li class="list-group-item py-3">
+            <div class="media">
+                <div class="mt-1 mr-3">
+                    <div class="media align-items-center">
+                        <div class="avatar avatar-sm avatar-soft-secondary avatar-circle mr-2">
+                            <span class="avatar-initials">@label.Substring(0, 1)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="media-body">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">@label</h5>
+                            <span class="d-block font-size-sm">Waybill</span>
+                        </div>
+
+                        <div class="col-auto text-danger">
+                            <span class="badge badge-soft-danger p-1">
+                                <i class="fal fa-upload"></i> Awaiting upload
+                            </span>
+                        </div>
+                    </div>
+                    <!-- End Row -->
+                </div>
+            </div>
+        </li>
+
+    }
+}
+
+
+<main id="content" role="main" class="main">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <div class="row align-items-end">
+                <div class="col-sm mb-2 mb-sm-0">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb breadcrumb-no-gutter">
+                            <li class="breadcrumb-item"><a class="breadcrumb-link" href="javascript:;">Quotation</a></li>
+                            <li class="breadcrumb-item"><a class="breadcrumb-link" href="javascript:;">Overview</a></li>
+                        </ol>
+                    </nav>
+
+                    <h1 class="page-header-title">Quotation</h1>
+                </div>
+            </div>
+            <!-- End Row -->
+        </div>
+        <div class="row justify-content-lg-center">
+            <div class="col-lg-10">
+
+                @if (ViewData["Message"] != null)
+                {
+                    <div>
+                        @Html.Raw(ViewData["Message"])
+                    </div>
+                }
+
+                <div class="row justify-content-lg-center">
+                    <div class="col-lg-9">
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <div class="card">
+                                    <div class="card-header bg-soft-secondary">
+                                        <h5 class="card-header-title">Quotation "Results Page"</h5>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <table class="table mt-4">
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Account Code:</span></td>
+                                                    <td class="TDdetail" colspan="12">@Model.Customers.CustomerName</td>
+                                                </tr>
+                                                <tr></tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Quotation Number:</span></td>
+                                                    <td class="TDdetail" colspan="12">@Model.Quote.QuoteNo</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Quotation Date:</span></td>
+                                                    <td class="TDdetail" colspan="12">@Model.Quote.DateQuote.ToString("dd MMMM yyyy")</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Service Type:</span></td>
+                                                    <td class="TDdetail" colspan="12">@Model.Quote.ServiceTypeText</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">From Suburb:</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat(Model.Quote.SenAdd4, " ", @Model.Quote.SenAdd5)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">To Suburb:</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat(Model.Quote.RecAdd4, " ", @Model.Quote.RecAdd5)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Total Quantity:</span></td>
+                                                    <td class="TDdetail" colspan="12">@Model.QuoteLines.Sum(x => x.Qty)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Chargeable Mass:</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat(Model.QuoteLines.Sum(x => Convert.ToDecimal(x.Mass)), "kg")</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">Subtotal (Ex VAT):</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat("R", Model.Quote.TotalValue - @Model.Quote.Vat)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD">VAT:</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat("R", Model.Quote.Vat)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="12"><span class="spanTD" style="color:red;">Total Incl. VAT:</span></td>
+                                                    <td class="TDdetail" colspan="12">@String.Concat("R", Model.Quote.TotalValue + @Model.Quote.Vat)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="card-footer">
+                                        <p>
+                                            Quote is based on service type, size, mass, origin and destination as supplied. Should any information differ on actual waybill, then the amount charged will be adjusted accordingly.
+                                            Quote valid for 30 days. Surcharges will be applied for early birds, Saturday deliveries and cross border documentation where applicable. Export and import VAT charges are excluded.
+                                            Standard Terms and Conditions apply.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 mx-auto">
+                                <div class="container align">
+                                    <div class="row align-items-center">
+                                        <a class="btn btn-primary btn-md btn-block" style="max-width:50%;" data-toggle="modal" data-target="#exampleModalCenter">
+                                            Email <i class="fal fa-external-link"></i>
+                                        </a>
+                                    </div>
+                                    <div class="row align-items-center mt-2"><a style="max-width:50%;" href="@Url.Action("QuotePDF", "Quotation",new { QuoteID = Model.Quote.QuoteID})" class="btn btn-primary btn-block">View</a></div>
+                                    <div class="row align-items-center mt-2"><a style="max-width:50%;" href="@Url.Action("Create", "Quotation")" class="btn btn-primary btn-block">New Quote</a></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- End Row -->
+    </div>
+    <!-- End Content -->
+    <div id="exampleModalCenter" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog " role="document">
+            <form method="post" asp-action="EmailQuote" asp-controller="Quotation" class="js-validate">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Email quotation</h5>
+                        <button type="button" class="btn btn-xs btn-icon btn-ghost-secondary" data-dismiss="modal" aria-label="Close">
+                            <i class="tio-clear tio-lg"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Form Group -->
+                        <div class="row form-group">
+                            <label for="txtEmail" class="col-sm-3 col-form-label input-label">Email address</label>
+
+                            <div class="col-sm-6 js-form-message">
+                                <input type="email" name="email" class="form-control" placeholder="Email Address" required data-msg="Please enter a email address" />
+                            </div>
+                            <input type="hidden" name="quoteId" value="@Model.Quote.QuoteID" />
+                        </div>
+                        <!-- End Form Group -->
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+
+@section scripts{
+    <script>
+        $(document).on('ready', function () {
+            // INITIALIZATION OF FORM VALIDATION
+            // =======================================================
+            $('.js-validate').each(function () {
+                $.HSCore.components.HSValidation.init($(this));
+            });
+        });
+    </script>
+}
+
+<style>
+    .spanTD{
+        font-weight: bolder;
+        color: black;
+        font-size: large;
+    }
+    .TDdetail {
+        border-left: thin;
+        font-size: medium;
+        color: black;
+    }
+</style>
